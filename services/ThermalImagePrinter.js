@@ -152,6 +152,7 @@ class ThermalImagePrinter {
 
             fs.writeFileSync(filepath, canvas.toBuffer('image/png'));
             console.log(`📸 Debug image saved: ${filename}`);
+            this.debugFilename = filename;
         } catch (e) {
             console.error('Failed to save debug image:', e.message);
         }
@@ -181,24 +182,42 @@ class ThermalImagePrinter {
             grayPixels.push(row);
         }
 
-        // Floyd-Steinberg Dithering
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const oldP = grayPixels[y][x];
-                const newP = oldP < 128 ? 0 : 255;
-                const err = oldP - newP;
+        const colorMode = this.data.color || 'grayscale';
 
-                if (x + 1 < width) grayPixels[y][x + 1] += err * 7 / 16;
-                if (y + 1 < height) {
-                    if (x > 0) grayPixels[y + 1][x - 1] += err * 3 / 16;
-                    grayPixels[y + 1][x] += err * 5 / 16;
-                    if (x + 1 < width) grayPixels[y + 1][x + 1] += err * 1 / 16;
+        if (colorMode === 'black_white') {
+            // Simple Thresholding
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const p = grayPixels[y][x];
+                    const newP = p < 128 ? 0 : 255;
+                    
+                    if (newP === 255) { // White pixel (inverted for thermal printer)
+                        const bytePos = (y * bytesPerRow) + Math.floor(x / 8);
+                        const bitPos = 7 - (x % 8);
+                        buffer[bytePos] |= (1 << bitPos);
+                    }
                 }
+            }
+        } else {
+            // Floyd-Steinberg Dithering
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const oldP = grayPixels[y][x];
+                    const newP = oldP < 128 ? 0 : 255;
+                    const err = oldP - newP;
 
-                if (newP === 255) { // White pixel (inverted for thermal printer)
-                    const bytePos = (y * bytesPerRow) + Math.floor(x / 8);
-                    const bitPos = 7 - (x % 8);
-                    buffer[bytePos] |= (1 << bitPos);
+                    if (x + 1 < width) grayPixels[y][x + 1] += err * 7 / 16;
+                    if (y + 1 < height) {
+                        if (x > 0) grayPixels[y + 1][x - 1] += err * 3 / 16;
+                        grayPixels[y + 1][x] += err * 5 / 16;
+                        if (x + 1 < width) grayPixels[y + 1][x + 1] += err * 1 / 16;
+                    }
+
+                    if (newP === 255) { // White pixel (inverted for thermal printer)
+                        const bytePos = (y * bytesPerRow) + Math.floor(x / 8);
+                        const bitPos = 7 - (x % 8);
+                        buffer[bytePos] |= (1 << bitPos);
+                    }
                 }
             }
         }

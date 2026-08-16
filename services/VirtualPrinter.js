@@ -282,7 +282,7 @@ class VirtualPrinter {
             drawCentered("Please Visit Again", 16);
             y += 20;
             ctx.font = "italic 14px Arial";
-            ctx.fillText("Powered by Hexcore", centerX, y);
+            ctx.fillText("Powered by Techdomain", centerX, y);
 
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const filename = `${type}_${timestamp}.png`;
