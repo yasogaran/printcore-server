@@ -2,6 +2,7 @@ const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
 const fs = require('fs');
 const config = require('../config');
+const PrinterCommands = require('./PrinterCommands');
 
 /**
  * ThermalImagePrinter - Service for printing base64-encoded images on thermal receipt paper
@@ -56,7 +57,12 @@ class ThermalImagePrinter {
         console.log('🔄 Converting to monochrome bitmap...');
         const bitmap = this.convertToMonochrome(imageData);
 
-        // 8. Build TSPL commands
+        // 8. Build print commands (protocol depends on printer model)
+        if (config.printer.language === 'escpos') {
+            console.log(`✅ Thermal image ready for printing (ESC/POS)`);
+            return PrinterCommands.escposBitmap(bitmap);
+        }
+
         const heightMm = Math.ceil(bitmap.heightDots / this.dotsPerMm) + 3;
         this.addCmd(`SIZE ${paperWidthMm} mm,${heightMm} mm`);
         this.addCmd('GAP 0,0');

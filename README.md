@@ -24,8 +24,24 @@ Created by **Yasogaran** at [Hexcore Pvt Limited](https://hexcore.lk).
 - **Zadig USB Driver (Windows Only):** To allow Node.js to communicate directly with your physical USB thermal printer, you must replace the default Windows printer driver with the **WinUSB** driver.
   1. Download [Zadig](https://zadig.akeo.ie/).
   2. Open Zadig, go to `Options` > `List All Devices`.
-  3. Select your thermal printer (e.g., Xprinter) from the dropdown.
+  3. Select your thermal printer (e.g., Xprinter 380 or Xprinter 80T) from the dropdown.
   4. Select **WinUSB** as the target driver and click **Replace Driver**.
+  5. Note the USB ID shown under the device name, formatted as `VVVV:PPPP` (e.g. `1FC9:2016`) — you'll need it below.
+
+- **Selecting your printer model:** The server ships with a known VID/PID profile for the **Xprinter 380** (`xp-380`, the default). For other models like the **Xprinter 80T**, or if your unit uses different IDs, set these in your `.env` file:
+
+  ```bash
+  # Pick a known profile ("xp-380" or "xp-80t")
+  PRINTER_MODEL=xp-80t
+
+  # Or override the VID/PID directly (hex, no 0x prefix) using the ID Zadig showed you
+  PRINTER_VID=1FC9
+  PRINTER_PID=2016
+  ```
+
+  `PRINTER_VID`/`PRINTER_PID` always win over `PRINTER_MODEL` when both are set, so they're the fastest way to point the server at a newly-installed printer.
+
+  Each profile also has a command **language**: `xp-380` uses TSPL (label-printer commands), `xp-80t` uses ESC/POS (receipt-printer commands) — sending the wrong language produces garbage output with no length limit. Add `PRINTER_LANGUAGE=escpos` (or `tspl`) in `.env` to override the profile's language directly, e.g. for an unlisted model.
 
 ### 2. Installation
 

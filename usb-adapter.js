@@ -66,10 +66,21 @@ class CustomUSB {
         try {
             if (this.interface) {
                 this.interface.release(true, (err) => {
-                    if (this.device) {
-                        this.device.close();
-                    }
-                    if (callback) callback(err);
+                    // On Windows/WinUSB, closing immediately after release can race with an
+                    // in-flight request still settling (more likely with the larger ESC/POS
+                    // raster buffers), throwing "Can't close device with a pending request".
+                    // A short delay lets it settle; if it still throws, the data was already
+                    // written, so we log and move on instead of crashing the print.
+                    setTimeout(() => {
+                        try {
+                            if (this.device) {
+                                this.device.close();
+                            }
+                        } catch (closeErr) {
+                            console.warn('⚠️ USB device close warning (ignored):', closeErr.message);
+                        }
+                        if (callback) callback(err);
+                    }, 50);
                 });
             } else {
                 if (callback) callback();

@@ -2,6 +2,7 @@ const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
 const fs = require('fs');
 const config = require('../config');
+const PrinterCommands = require('./PrinterCommands');
 
 /**
  * LabelImagePrinter - Service for printing base64-encoded images on labels
@@ -59,7 +60,12 @@ class LabelImagePrinter {
         console.log('🔄 Converting to monochrome bitmap...');
         const bitmap = this.convertToMonochrome(imageData);
 
-        // 8. Build TSPL commands
+        // 8. Build print commands (protocol depends on printer model)
+        if (config.printer.language === 'escpos') {
+            console.log(`✅ Label image ready for printing (ESC/POS)`);
+            return PrinterCommands.escposBitmap(bitmap);
+        }
+
         this.addCmd(`SIZE ${labelWidthMm} mm,${labelHeightMm} mm`);
         this.addCmd('GAP 2 mm,0 mm');
         this.addCmd('CLS');

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-PnpDevice | Where-Object { $_.InstanceId -match 'USB' } | Select-Object FriendlyName, InstanceId, Status | Format-Table -AutoSize -Wrap)",
+      "PowerShell(Get-PnpDevice | Where-Object { $_.InstanceId -match 'VID_0483' } | Select-Object FriendlyName, InstanceId, Status, Class | Format-List)",
+      "PowerShell(Get-PnpDeviceProperty -InstanceId \"USB\\\\VID_0483&PID_5743\\\\3DC156472847\" -KeyName 'DEVPKEY_Device_DriverDesc','DEVPKEY_Device_Service','DEVPKEY_Device_ProblemCode')",
+      "Bash(node --check usb-adapter.js)"
+    ]
+  }
+}

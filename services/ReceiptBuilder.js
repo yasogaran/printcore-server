@@ -1,4 +1,5 @@
 const LogoManager = require('./LogoManager');
+const PrinterCommands = require('./PrinterCommands');
 const { createCanvas, loadImage, registerFont } = require('canvas');
 const path = require('path');
 const fs = require('fs');
@@ -71,7 +72,12 @@ class ReceiptBuilder {
         console.log('🔄 Converting to monochrome bitmap...');
         const bitmap = this.convertToMonochrome(imageData);
 
-        // 4. Build TSPL commands
+        // 4. Build print commands (protocol depends on printer model)
+        if (config.printer.language === 'escpos') {
+            console.log(`✅ Receipt ready: ${bitmap.widthDots}x${bitmap.heightDots} dots (ESC/POS)`);
+            return PrinterCommands.escposBitmap(bitmap);
+        }
+
         this.sizeCommandIndex = this.commandBuffer.length;
         const heightMm = Math.ceil(bitmap.heightDots / this.dotsPerMm) + 3;
         this.addCmd(`SIZE ${this.widthMm} mm,${heightMm} mm`);
