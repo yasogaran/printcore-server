@@ -29,7 +29,8 @@ app.get('/', (req, res) => {
             "POST /api/v2/print/receipt": "Send structured receipt object. Set settings.template to 'boxed-template' for the boxed invoice layout (MRP/Selling/Qty boxes, item discounts, loyalty points), print_barcode: true to append an invoice code barcode, and kick_drawer: true to pulse the cash drawer on the printer's RJ11 port (ESC/POS printers only). See docs/receipt-printing.md",
             "POST /api/v2/print/label": "Send structured label object",
             "POST /api/v2/print/label/image": "Print base64-encoded image on label",
-            "POST /api/v2/print/image": "Print base64-encoded image on thermal paper"
+            "POST /api/v2/print/image": "Print base64-encoded image on thermal paper",
+            "POST /api/v2/dataset/upload": "Upload a .csv/.txt dataset file (multipart/form-data: updatedOn, targetPath, fileType, file) and save it to a local target path. See docs/dataset-upload.md"
         }
     });
 });
@@ -159,6 +160,9 @@ app.post('/api/v2/print/image', async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
+// --- DATASET UPLOAD (isolated feature, see routes/dataset.js) ---
+app.use('/api/v2/dataset', require('./routes/dataset'));
 
 // Start
 app.listen(config.port, () => {

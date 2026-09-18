@@ -251,7 +251,7 @@ class ReceiptBuilder {
         y += 20;
         ctx.font = `italic ${FONT_CONFIG.footerTiny}px ${FONT_CONFIG.fontFamily}`;
         ctx.textAlign = 'center';
-        ctx.fillText("Powered by Techdomain", centerX, y);
+        ctx.fillText("Powered by Hexcore", centerX, y);
         y += 40;
 
         // Crop canvas to actual content height

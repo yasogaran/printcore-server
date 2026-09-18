@@ -314,7 +314,7 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         y += 20;
         ctx.font = `italic 14px ${fontFamily}`;
         ctx.textAlign = 'center';
-        ctx.fillText('Powered by Techdomain', centerX, y);
+        ctx.fillText('Powered by Hexcore', centerX, y);
         y += 40;
 
         // --- INVOICE CODE BARCODE (new section, end of invoice) ---
