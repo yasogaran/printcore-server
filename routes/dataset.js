@@ -24,17 +24,19 @@ router.post('/upload', (req, res) => {
         }
 
         try {
-            const { updatedOn, targetPath, fileType } = req.body;
+            const { updatedOn, targetPath, fileType, fileName } = req.body;
             const result = await DatasetUploader.save({
                 updatedOn,
                 targetPath,
                 fileType,
+                fileName,
                 file: req.file
             });
 
             return res.status(200).json({
                 status: 'success',
                 savedPath: result.savedPath,
+                fileName: result.fileName,
                 updatedOn: result.updatedOn
             });
         } catch (e) {

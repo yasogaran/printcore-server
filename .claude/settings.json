@@ -5,7 +5,10 @@
       "PowerShell(Get-PnpDevice | Where-Object { $_.InstanceId -match 'VID_0483' } | Select-Object FriendlyName, InstanceId, Status, Class | Format-List)",
       "PowerShell(Get-PnpDeviceProperty -InstanceId \"USB\\\\VID_0483&PID_5743\\\\3DC156472847\" -KeyName 'DEVPKEY_Device_DriverDesc','DEVPKEY_Device_Service','DEVPKEY_Device_ProblemCode')",
       "Bash(node --check usb-adapter.js)",
-      "Bash(node -e \"console.log\\(require\\('multer/package.json'\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\('multer/package.json'\\).version\\)\")",
+      "Bash(grep -v -E '^t[0-9] \\\\|' logs/dataset-uploads.log)",
+      "Bash(cp /tmp/log_clean.txt logs/dataset-uploads.log)",
+      "Bash(rm -rf /tmp/fntest /tmp/log_clean.txt /tmp/server_fn.log \"C:/Users/yasog/AppData/Local/Temp/fn-test-target\")"
     ]
   }
 }

@@ -25,7 +25,7 @@ class DatasetUploader {
         return t.startsWith('.') ? t : `.${t}`;
     }
 
-    static async save({ updatedOn, targetPath, fileType, file }) {
+    static async save({ updatedOn, targetPath, fileType, fileName, file }) {
         if (!targetPath) throw new ValidationError('targetPath is required');
         if (!file) throw new ValidationError('file is required');
 
@@ -34,27 +34,31 @@ class DatasetUploader {
             throw new ValidationError(`fileType must be one of ${ALLOWED_TYPES.join(', ')}`);
         }
 
-        const uploadedExt = path.extname(file.originalname).toLowerCase();
-        if (uploadedExt !== normalizedType) {
+        // basename keeps the file inside targetPath even if the caller sends separators.
+        let storedName = path.basename(fileName || file.originalname);
+        if (!path.extname(storedName)) storedName += normalizedType;
+
+        const storedExt = path.extname(storedName).toLowerCase();
+        if (storedExt !== normalizedType) {
             throw new ValidationError(
-                `Uploaded file extension "${uploadedExt}" does not match declared fileType "${normalizedType}"`
+                `File name extension "${storedExt}" does not match declared fileType "${normalizedType}"`
             );
         }
 
         fs.mkdirSync(targetPath, { recursive: true });
 
-        const savedPath = path.join(targetPath, file.originalname);
+        const savedPath = path.join(targetPath, storedName);
         fs.writeFileSync(savedPath, file.buffer);
 
         const resolvedUpdatedOn = updatedOn || new Date().toISOString();
         DatasetUploader.logAction({
             updatedOn: resolvedUpdatedOn,
             targetPath,
-            fileName: file.originalname,
+            fileName: storedName,
             fileType: normalizedType
         });
 
-        return { savedPath, updatedOn: resolvedUpdatedOn };
+        return { savedPath, fileName: storedName, updatedOn: resolvedUpdatedOn };
     }
 
     static logAction({ updatedOn, targetPath, fileName, fileType }) {
