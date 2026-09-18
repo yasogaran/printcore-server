@@ -27,6 +27,15 @@ class PrinterCommands {
             Buffer.from([0x1d, 0x56, 0x01]),
         ]);
     }
+
+    // ESC p m t1 t2 - generate a pulse to kick the cash drawer connected to the
+    // printer's RJ11 port. m selects the pin (0 = pin 2, 1 = pin 5; pin 2 is the
+    // standard/default wiring). t1/t2 are the pulse ON/OFF durations; 25/250 is the
+    // widely-used default (~50ms on / ~500ms off).
+    static escposDrawerKick(pin = 2, onMs = 25, offMs = 250) {
+        const m = pin === 5 ? 1 : 0;
+        return Buffer.from([0x1b, 0x70, m, onMs & 0xff, offMs & 0xff]);
+    }
 }
 
 module.exports = PrinterCommands;

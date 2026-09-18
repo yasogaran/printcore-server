@@ -325,3 +325,4 @@ class ReceiptBuilder {
 }
 
 module.exports = ReceiptBuilder;
+module.exports.FONT_CONFIG = FONT_CONFIG;
