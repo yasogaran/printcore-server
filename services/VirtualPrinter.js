@@ -1,7 +1,9 @@
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas } = require('canvas');
 const fs = require('fs');
 const path = require('path');
 const config = require('../config');
+const ReceiptBuilder = require('./ReceiptBuilder');
+const BoxedReceiptBuilder = require('./BoxedReceiptBuilder');
 
 class VirtualPrinter {
     constructor() {
@@ -153,136 +155,9 @@ class VirtualPrinter {
     // ==========================================
     async generateReceiptImage(data, type) {
         try {
-            const width = 576;
-            const estimatedHeight = 900 + (data.items.length * 60);
-            const canvas = createCanvas(width, estimatedHeight);
-            const ctx = canvas.getContext('2d');
-            const margin = 20;
-            const centerX = width / 2;
-
-            // Background
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, width, estimatedHeight);
-            ctx.fillStyle = '#000000';
-            ctx.textBaseline = 'top';
-            let y = 40;
-
-            // --- DRAW LOGO ---
-            if (data.store && data.store.logo) {
-                try {
-                    let img;
-                    if (this.imageCache.has(data.store.logo)) {
-                        img = this.imageCache.get(data.store.logo);
-                    } else {
-                        img = await loadImage(data.store.logo);
-                        this.imageCache.set(data.store.logo, img);
-                    }
-                    const aspectRatio = img.width / img.height;
-                    const drawHeight = 100;
-                    const drawWidth = drawHeight * aspectRatio;
-                    const xPos = (width - drawWidth) / 2;
-                    ctx.drawImage(img, xPos, y, drawWidth, drawHeight);
-                    y += drawHeight + 20;
-                } catch (e) {
-                    console.log("Virtual Preview: Logo load failed (skipping)");
-                }
-            }
-
-            // Helper Functions
-            const drawCentered = (text, fontSize, isBold = false) => {
-                ctx.font = `${isBold ? 'bold' : ''} ${fontSize}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillText(text, centerX, y);
-                y += fontSize + 8;
-            };
-
-            const drawLeftRight = (left, right, fontSize, isBold = false) => {
-                ctx.font = `${isBold ? 'bold' : ''} ${fontSize}px Arial`;
-                ctx.textAlign = 'left';
-                ctx.fillText(left, margin, y);
-                ctx.textAlign = 'right';
-                ctx.fillText(right, width - margin, y);
-                y += fontSize + 8;
-            };
-
-            const drawDashedLine = () => {
-                y += 5;
-                ctx.beginPath();
-                ctx.setLineDash([5, 5]);
-                ctx.moveTo(margin, y);
-                ctx.lineTo(width - margin, y);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                y += 20;
-            };
-
-            // Receipt Content
-            drawCentered(data.store.name.toUpperCase(), 28, true);
-            y += 5;
-            drawCentered(data.store.address, 18);
-            if (data.store.phones) drawCentered(`Tel: ${data.store.phones.join(', ')}`, 18);
-
-            y += 10;
-            drawCentered("RECEIPT", 24, true);
-            drawDashedLine();
-
-            drawCentered(data.meta.id, 22);
-            y += 10;
-            drawLeftRight("Date:", data.meta.date, 18);
-            drawLeftRight("Cashier:", data.meta.cashier, 18);
-            drawDashedLine();
-
-            drawLeftRight("ITEM", "TOTAL", 18, true);
-            y += 5;
-
-            data.items.forEach(item => {
-                ctx.textAlign = 'left';
-                ctx.font = "bold 18px Arial";
-                ctx.fillText(item.title, margin, y);
-                y += 24;
-
-                ctx.font = "18px Arial";
-                ctx.textAlign = 'left';
-                // Safe fix for undefined/null values
-                const price = Number(item.unitPrice || 0).toFixed(2);
-                const total = Number(item.total || 0).toFixed(2);
-
-                const qtyText = `${item.qty} x LKR ${price}`;
-                ctx.fillText(qtyText, margin + 10, y);
-
-                ctx.textAlign = 'right';
-                ctx.font = "bold 18px Arial";
-                ctx.fillText(`LKR ${total}`, width - margin, y);
-
-                y += 30;
-            });
-            drawDashedLine();
-
-            const { summary, status } = data.financials;
-            drawLeftRight("Subtotal:", `LKR ${Number(summary.subtotal).toFixed(2)}`, 18);
-            if (summary.discount > 0) {
-                drawLeftRight("Discount:", `- LKR ${Number(summary.discount).toFixed(2)}`, 18);
-            }
-            y += 10;
-            drawLeftRight("TOTAL:", `LKR ${Number(summary.total).toFixed(2)}`, 28, true);
-            drawDashedLine();
-
-            drawCentered("PAYMENT DETAILS", 18, true);
-            y += 10;
-            if (summary.paidAmount > 0) drawLeftRight("Cash:", `LKR ${Number(summary.paidAmount).toFixed(2)}`, 18);
-            if (summary.balance > 0) drawLeftRight("Balance Due:", `LKR ${Number(summary.balance).toFixed(2)}`, 18);
-
-            y += 20;
-            drawLeftRight("Status:", status ? status.toUpperCase() : "PAID", 20, true);
-            y += 10;
-            drawDashedLine();
-
-            y += 10;
-            drawCentered("THANK YOU!", 20, true);
-            drawCentered("Please Visit Again", 16);
-            y += 20;
-            ctx.font = "italic 14px Arial";
-            ctx.fillText("Powered by Techdomain", centerX, y);
+            const Builder = data.settings?.template === 'boxed-template' ? BoxedReceiptBuilder : ReceiptBuilder;
+            const builder = new Builder(data);
+            const { canvas } = await builder.renderReceiptImage();
 
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const filename = `${type}_${timestamp}.png`;

@@ -3,6 +3,7 @@ const bwipjs = require('bwip-js');
 const path = require('path');
 const fs = require('fs');
 const config = require('../config');
+const PrinterCommands = require('./PrinterCommands');
 
 // ===== CUSTOMIZABLE FONT CONFIGURATION =====
 const FONT_CONFIG = {
@@ -57,7 +58,12 @@ class LabelBuilder {
         console.log('🔄 Converting to monochrome bitmap...');
         const bitmap = this.convertToMonochrome(imageData);
 
-        // 6. Build TSPL commands
+        // 6. Build print commands (protocol depends on printer model)
+        if (config.printer.language === 'escpos') {
+            console.log(`✅ Label ready: ${widthDots}x${heightDots} dots (ESC/POS)`);
+            return PrinterCommands.escposBitmap(bitmap);
+        }
+
         this.addCmd(`SIZE ${w} mm,${h} mm`);
         this.addCmd('GAP 2 mm,0 mm');
         this.addCmd('CLS');
