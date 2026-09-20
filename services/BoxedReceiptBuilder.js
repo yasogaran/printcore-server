@@ -32,8 +32,8 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         ctx.fillStyle = '#000000';
         ctx.textBaseline = 'top';
         // Real XP-80T hardware prints this layout shifted right of where the canvas places
-        // it; nudge everything drawn on this context ~10px left to compensate.
-        ctx.translate(-10, 0);
+        // it; nudge everything drawn on this context ~15px left to compensate.
+        ctx.translate(-15, 0);
         let y = 40;
 
         const drawCentered = (text, fontSize, isBold = false) => {
@@ -286,17 +286,21 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
             drawItemCard(index + 1, item, itemDiscount);
         });
 
-        const netTotal = grossTotal - totalDiscount;
+        const cartDiscount = Number(this.data.financials?.summary?.cartDiscount || 0);
+        const netTotal = grossTotal - totalDiscount - cartDiscount;
+        const totalSaved = totalDiscount + cartDiscount;
 
         drawDashedLine();
         drawLeftRight('GROSS TOTAL', `${grossTotal.toFixed(2)}`, BOX_FONT_CONFIG.summary);
         drawSolidLine(false);
-        drawLeftRight('DISCOUNT EARNED', `${totalDiscount.toFixed(2)}`, BOX_FONT_CONFIG.summary);
+        drawLeftRight('ITEM DISCOUNT', `${totalDiscount.toFixed(2)}`, BOX_FONT_CONFIG.summary);
+        drawSolidLine(false);
+        drawLeftRight('CART DISCOUNT', `${cartDiscount.toFixed(2)}`, BOX_FONT_CONFIG.summary);
         drawSolidLine(true);
         drawLeftRight('NET TOTAL', `${netTotal.toFixed(2)}`, BOX_FONT_CONFIG.summaryTotal, true);
         drawDashedLine();
 
-        drawSavedBox(totalDiscount);
+        drawSavedBox(totalSaved);
 
         // --- FOOTER ---
         const { summary = {}, status } = this.data.financials || {};
