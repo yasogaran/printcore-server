@@ -4,7 +4,7 @@
 
 The boxed template is an alternative invoice layout for the JSON Receipt Printing endpoint. It renders a bordered item table showing MRP/Selling price/Qty, an optional per-item discount row, a "You Saved" callout box, and a loyalty points box.
 
-It reuses the same `store` and `meta` fields as the [default receipt layout](receipt-printing.md), but expects extra fields on `items`, an optional top-level `loyalty` object, and a boxed-template-specific `financials.summary.payments` array for the Payment Details section.
+It reuses the same `store` and `meta` fields as the [default receipt layout](receipt-printing.md), but expects extra fields on `items`, an optional top-level `customer` object, and a boxed-template-specific `financials.summary.payments` array for the Payment Details section.
 
 ## Endpoint
 
@@ -35,7 +35,10 @@ Selected via `settings.template: "boxed-template"`. Any other value (or omitted)
     },
     "status": "PAID"
   },
-  "loyalty": { "earned": 24, "total": 340 }
+  "customer": {
+    "name": "Jane Silva",
+    "loyaltyPoints": { "earned": 24, "total": 340 }
+  }
 }
 ```
 
@@ -85,14 +88,15 @@ Free-text status string, printed uppercased on its own row (e.g. `"PAID"`, `"PAR
 - `DISCOUNT EARNED = sum(items[].discount)`
 - `NET TOTAL = GROSS TOTAL - DISCOUNT EARNED`
 
-### `loyalty` (Optional, top-level)
+### `customer` (Optional, top-level)
 
-| Field    | Type   | Description                               |
-| -------- | ------ | ------------------------------------------ |
-| `earned` | Number | Loyalty points earned on this bill.        |
-| `total`  | Number | Customer's total loyalty point balance.    |
+| Field                    | Type   | Description                                                                          |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------- |
+| `name`                   | String | Customer name. Printed as its own "Customer: {name}" row directly under the Date/Cashier rows, before the item table. |
+| `loyaltyPoints.earned`   | Number | Loyalty points earned on this bill.                                                  |
+| `loyaltyPoints.total`    | Number | Customer's total loyalty point balance.                                              |
 
-When `loyalty` is omitted, the loyalty box is skipped entirely.
+`name` and `loyaltyPoints` are independently optional — supplying one without the other prints only that piece. When `loyaltyPoints` is present, a bordered loyalty points box is printed after the Payment Details/Status section, before the "THANK YOU!" footer and barcode (if any). When `customer` is omitted entirely, neither the name row nor the points box are printed.
 
 ### `print_barcode` (Optional, top-level)
 
