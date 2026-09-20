@@ -20,10 +20,15 @@ class PrinterCommands {
             Buffer.from([0x1b, 0x40]),                                // ESC @  - initialize printer
             Buffer.from([0x1d, 0x76, 0x30, 0x00, xL, xH, yL, yH]),     // GS v 0 - print raster bit image
             inverted,
-            // GS V 1 - partial cut (2-byte form). The cut command itself advances the
-            // paper to the cutter, so no manual feed beforehand is needed; the extended
-            // 4-byte form (GS V 66 n) isn't reliably supported by cheaper POS-80 clones
-            // and can cause them to feed far more paper than expected before cutting.
+            // ESC d 5 - feed 5 lines before cutting. On tall raster images (e.g. boxed
+            // template with a trailing barcode section) the cutter can fire before the
+            // tail of the image has physically cleared the print head, so it ends up
+            // printed past the cut line on the next receipt. GS V's own paper advance
+            // isn't enough to guarantee that on cheaper POS-80 clones.
+            Buffer.from([0x1b, 0x64, 0x05]),
+            // GS V 1 - partial cut (2-byte form). The extended 4-byte form (GS V 66 n)
+            // isn't reliably supported by cheaper POS-80 clones and can cause them to
+            // feed far more paper than expected before cutting.
             Buffer.from([0x1d, 0x56, 0x01]),
         ]);
     }

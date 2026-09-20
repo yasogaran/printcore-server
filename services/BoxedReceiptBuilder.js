@@ -31,6 +31,9 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         ctx.fillRect(0, 0, width, estimatedHeight);
         ctx.fillStyle = '#000000';
         ctx.textBaseline = 'top';
+        // Real XP-80T hardware prints this layout shifted right of where the canvas places
+        // it; nudge everything drawn on this context ~10px left to compensate.
+        ctx.translate(-10, 0);
         let y = 40;
 
         const drawCentered = (text, fontSize, isBold = false) => {
@@ -296,14 +299,19 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
             drawLoyaltyBox(this.data.loyalty.earned || 0, this.data.loyalty.total || 0);
         }
 
-        // --- FOOTER (unchanged from the plain template) ---
+        // --- FOOTER ---
         const { summary = {}, status } = this.data.financials || {};
         drawCentered('PAYMENT DETAILS', 18, true);
         y += 10;
-        if (summary.paidAmount > 0) drawLeftRight('Cash:', `${Number(summary.paidAmount).toFixed(2)}`, 18);
+
+        const payments = Array.isArray(summary.payments) ? summary.payments : [];
+        payments.forEach((p) => {
+            if (!p || !p.paymentType) return;
+            drawLeftRight(`${p.paymentType}:`, `${Number(p.amount || 0).toFixed(2)}`, 18);
+        });
         if (summary.balance > 0) drawLeftRight('Balance Due:', `${Number(summary.balance).toFixed(2)}`, 18);
 
-        y += 20;
+        drawDashedLine();
         drawLeftRight('Status:', status ? status.toUpperCase() : 'PAID', 20, true);
         y += 10;
         drawDashedLine();
