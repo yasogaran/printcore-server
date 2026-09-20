@@ -161,6 +161,9 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         drawLeftRight(`Date: ${this.data.meta.date}`, '', 18);
         y -= 18 + 8;
         drawLeftRight('', `Cashier: ${this.data.meta.cashier}`, 18);
+        if (this.data.customer && this.data.customer.name) {
+            drawLeftRight(`Customer: ${this.data.customer.name}`, '', 18);
+        }
         drawDashedLine();
 
         // --- ITEM TABLE ---
@@ -295,10 +298,6 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
 
         drawSavedBox(totalDiscount);
 
-        if (this.data.loyalty) {
-            drawLoyaltyBox(this.data.loyalty.earned || 0, this.data.loyalty.total || 0);
-        }
-
         // --- FOOTER ---
         const { summary = {}, status } = this.data.financials || {};
         drawCentered('PAYMENT DETAILS', 18, true);
@@ -315,6 +314,10 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         drawLeftRight('Status:', status ? status.toUpperCase() : 'PAID', 20, true);
         y += 10;
         drawDashedLine();
+
+        if (this.data.customer && this.data.customer.loyaltyPoints) {
+            drawLoyaltyBox(this.data.customer.loyaltyPoints.earned || 0, this.data.customer.loyaltyPoints.total || 0);
+        }
 
         y += 10;
         drawCentered('THANK YOU!', 20, true);
