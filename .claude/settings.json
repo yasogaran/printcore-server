@@ -8,7 +8,9 @@
       "Bash(node -e \"console.log\\(require\\('multer/package.json'\\).version\\)\")",
       "Bash(grep -v -E '^t[0-9] \\\\|' logs/dataset-uploads.log)",
       "Bash(cp /tmp/log_clean.txt logs/dataset-uploads.log)",
-      "Bash(rm -rf /tmp/fntest /tmp/log_clean.txt /tmp/server_fn.log \"C:/Users/yasog/AppData/Local/Temp/fn-test-target\")"
+      "Bash(rm -rf /tmp/fntest /tmp/log_clean.txt /tmp/server_fn.log \"C:/Users/yasog/AppData/Local/Temp/fn-test-target\")",
+      "Bash(node -c services/BoxedReceiptBuilder.js)",
+      "Bash(node -c services/PrinterCommands.js)"
     ]
   }
 }

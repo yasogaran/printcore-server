@@ -166,48 +166,5 @@ Works with either template (plain or boxed) since it operates on the raw print b
 
 ## Boxed Template (`settings.template: "boxed-template"`)
 
-An alternative invoice layout with a bordered item table showing MRP/Selling price/Qty, an optional per-item discount row, a "You Saved" callout box, and a loyalty points box. It reuses the same `store`, `meta`, and `financials.status`/`financials.summary.paidAmount`/`financials.summary.balance` fields as the default layout (header and payment-details sections are unchanged) but expects extra fields on `items` and an optional top-level `loyalty` object.
+An alternative invoice layout with a bordered item table, "You Saved" callout box, and loyalty points box. See [Boxed Template Receipt Printing API](boxed-template-printing.md) for the full payload spec.
 
-### Full Payload Example
-
-```json
-{
-  "settings": { "paperWidth": 80, "template": "boxed-template" },
-  "store": { "name": "hexcore Supermart", "address": "123 Main Street, City" },
-  "meta": { "id": "INV-2026-001", "date": "2026-08-16 14:30", "cashier": "John Doe" },
-  "items": [
-    { "title": "Wireless Mouse M330", "mrp": 1200, "sellingPrice": 1200, "qty": 4, "total": 4800, "discount": 0 },
-    { "title": "Mechanical Keyboard", "mrp": 1200, "sellingPrice": 1200, "qty": 4, "total": 4800, "discount": 1900 }
-  ],
-  "financials": {
-    "summary": { "paidAmount": 7700.0, "balance": 0 },
-    "status": "PAID"
-  },
-  "loyalty": { "earned": 24, "total": 340 }
-}
-```
-
-### Extra `items[]` fields
-
-| Field          | Type   | Description                                                                                         |
-| -------------- | ------ | ----------------------------------------------------------------------------------------------------|
-| `mrp`          | Number | Maximum retail price, shown in its own box.                                                          |
-| `sellingPrice` | Number | Actual selling price, shown in its own box.                                                          |
-| `discount`     | Number | This item's own discount amount, supplied by the caller directly (not derived from `mrp - sellingPrice`). When greater than `0`, a "DISCOUNT / YOU SAVED" row is drawn under that item. |
-
-`GROSS TOTAL`, `DISCOUNT EARNED`, and `NET TOTAL` in the summary, and the amount in the "You Saved" box, are all computed by the server from the items array: `GROSS TOTAL = sum(items[].total)`, `DISCOUNT EARNED = sum(items[].discount)`, `NET TOTAL = GROSS TOTAL - DISCOUNT EARNED`.
-
-### `loyalty` (Optional)
-
-| Field    | Type   | Description                                             |
-| -------- | ------ | -------------------------------------------------------- |
-| `earned` | Number | Loyalty points earned on this bill.                       |
-| `total`  | Number | Customer's total loyalty point balance.                   |
-
-### `print_barcode` (Optional, top-level)
-
-| Field           | Type    | Description                                                                                          |
-| --------------- | ------- | ------------------------------------------------------------------------------------------------------|
-| `print_barcode` | Boolean | When `true`, a Code128 barcode encoding `meta.id` is printed as a new section at the very end of the invoice, below the footer. Omit or set `false` to skip it. |
-
-When `loyalty` is omitted, the loyalty box is skipped entirely.
