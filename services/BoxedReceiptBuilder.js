@@ -32,8 +32,8 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         ctx.fillStyle = '#000000';
         ctx.textBaseline = 'top';
         // Real XP-80T hardware prints this layout shifted right of where the canvas places
-        // it; nudge everything drawn on this context ~20px left to compensate.
-        ctx.translate(-20, 0);
+        // it; nudge everything drawn on this context ~15px left to compensate.
+        ctx.translate(-15, 0);
         let y = 40;
 
         const drawCentered = (text, fontSize, isBold = false) => {
