@@ -31,6 +31,7 @@ Selected via `settings.template: "boxed-template"`. Any other value (or omitted)
         { "paymentType": "Cash", "amount": 5000.0 },
         { "paymentType": "Card", "amount": 2700.0 }
       ],
+      "cartDiscount": 200.0,
       "balance": 0
     },
     "status": "PAID"
@@ -82,11 +83,17 @@ Free-text status string, printed uppercased on its own row (e.g. `"PAID"`, `"PAR
 | `total`        | Number | Line total for this item.                                                                                                                 |
 | `discount`     | Number | This item's own discount amount, supplied by the caller directly (not derived from `mrp - sellingPrice`). When greater than `0`, a "DISCOUNT / YOU SAVED" row is drawn under that item. |
 
-`GROSS TOTAL`, `DISCOUNT EARNED`, and `NET TOTAL` in the summary, and the amount in the "You Saved" box, are all computed by the server from the items array:
+### `financials.summary.cartDiscount` (Optional)
+
+An additional invoice-level discount applied on top of the per-item discounts. Printed as a "CART DISCOUNT" row right after "ITEM DISCOUNT" in the summary (shown as `0.00` when omitted).
+
+`GROSS TOTAL`, `ITEM DISCOUNT`, `CART DISCOUNT`, and `NET TOTAL` in the summary, and the amount in the "You Saved" box, are computed as follows:
 
 - `GROSS TOTAL = sum(items[].total)`
-- `DISCOUNT EARNED = sum(items[].discount)`
-- `NET TOTAL = GROSS TOTAL - DISCOUNT EARNED`
+- `ITEM DISCOUNT = sum(items[].discount)`
+- `CART DISCOUNT = financials.summary.cartDiscount` (defaults to `0`)
+- `NET TOTAL = GROSS TOTAL - ITEM DISCOUNT - CART DISCOUNT`
+- "You Saved" box = `ITEM DISCOUNT + CART DISCOUNT`
 
 ### `customer` (Optional, top-level)
 
