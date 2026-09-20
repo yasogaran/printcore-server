@@ -279,7 +279,7 @@ class BoxedReceiptBuilder extends ReceiptBuilder {
         let totalDiscount = 0;
 
         this.data.items.forEach((item, index) => {
-            grossTotal += Number(item.total || 0);
+            grossTotal += Number(item.mrp || 0) * Number(item.qty || 0);
             const itemDiscount = Number(item.discount || 0);
             totalDiscount += itemDiscount;
 

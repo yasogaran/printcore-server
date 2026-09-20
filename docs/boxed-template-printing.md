@@ -89,7 +89,7 @@ An additional invoice-level discount applied on top of the per-item discounts. P
 
 `GROSS TOTAL`, `ITEM DISCOUNT`, `CART DISCOUNT`, and `NET TOTAL` in the summary, and the amount in the "You Saved" box, are computed as follows:
 
-- `GROSS TOTAL = sum(items[].total)`
+- `GROSS TOTAL = sum(items[].mrp * items[].qty)`
 - `ITEM DISCOUNT = sum(items[].discount)`
 - `CART DISCOUNT = financials.summary.cartDiscount` (defaults to `0`)
 - `NET TOTAL = GROSS TOTAL - ITEM DISCOUNT - CART DISCOUNT`
